@@ -38,21 +38,27 @@ for line in lines:
     eightCode = [x for x in signalPatterns if len(x) == 7]
     signalPatterns.remove(eightCode[0])
 
+    # 3 has 5 chars and always contains the same chars as the number 7
     threeCode = [x for x in signalPatterns if len(x) == 5 and contains(x, sevenCode[0])]
     signalPatterns.remove(threeCode[0])
 
+    # 9 has 6 chars and always contains the same chars as the number 3
     nineCode = [x for x in signalPatterns if len(x) == 6 and contains(x, threeCode[0])]
     signalPatterns.remove(nineCode[0])
 
+    # 0 has 6 chars and always contains the same chars as the number 1
     zeroCode = [x for x in signalPatterns if len(x) == 6 and contains(x, oneCode[0])]
     signalPatterns.remove(zeroCode[0])
 
+    # after excluding other numbers that contain 6 chars, only number 6 is left
     sixCode = [x for x in signalPatterns if len(x) == 6]
     #signalPatterns.remove(sixCode[0])
 
+    # 5 has 5 chars and it is contained in number 6
     fiveCode = [x for x in signalPatterns if len(x) == 5 and contains(sixCode[0], x)]
     signalPatterns.remove(fiveCode[0])
 
+    # 2 is the other number with 5 chars that's left
     twoCode = [x for x in signalPatterns if len(x) == 5]
 
     digitsMap = {
