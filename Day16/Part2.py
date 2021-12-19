@@ -3,7 +3,8 @@ import sys
 my_file = open("input", "r")
 content = my_file.readlines()
 
-decoder = {"0":"0000",
+decoder = {
+"0":"0000",
 "1":"0001",
 "2":"0010",
 "3":"0011",
@@ -52,6 +53,7 @@ def decode_package(decoded, operation_result):
             # 15 bits
             l = decoded[7:(7+15)]
             length_of_subpackets = int(l,2)
+            op_result = 0
             if length_of_subpackets > 0:
                 initial_index = (7+15)
                 remaining_string = decoded[initial_index:]
@@ -62,9 +64,11 @@ def decode_package(decoded, operation_result):
                     subpackets = remaining_string[0:]
                     initial_index = initial_index+length_of_subpackets
                     remaining_string =  decode_package(subpackets, packet_value)
-                    operation_result[0] += packet_value[0]
+                    op_result += packet_value[0]
                     consumed_bits += remaining_bits - len(remaining_string)
                     remaining_bits = len(remaining_string)
+
+            operation_result[0] = op_result
             return remaining_string
         else:
             # 11 bits
@@ -72,6 +76,7 @@ def decode_package(decoded, operation_result):
             length_of_subpackets = int(l,2)
             initial_index = 7+11
             subpackets = list()
+            op_result = 0
 
             if length_of_subpackets > 0:
                 remaining_string = decoded[initial_index:]
@@ -81,10 +86,11 @@ def decode_package(decoded, operation_result):
                 while remaining_bits > 0 and consumed_packets < length_of_subpackets:
                     subpackets = remaining_string[0:]
                     remaining_string =  decode_package(subpackets, packet_value)
-                    operation_result[0] += packet_value[0]
+                    op_result += packet_value[0]
                     consumed_packets += 1
                     remaining_bits = len(remaining_string)
                     initial_index = initial_index + remaining_bits
+            operation_result[0] = op_result
             return remaining_string
     elif packet_type_id == 1:
         i = decoded[6:7]
@@ -92,6 +98,7 @@ def decode_package(decoded, operation_result):
             # 15 bits
             l = decoded[7:(7+15)]
             length_of_subpackets = int(l,2)
+            op_result = 1
             if length_of_subpackets > 0:
                 initial_index = (7+15)
                 remaining_string = decoded[initial_index:]
@@ -103,9 +110,10 @@ def decode_package(decoded, operation_result):
                     subpackets = remaining_string[0:]
                     initial_index = initial_index+length_of_subpackets
                     remaining_string =  decode_package(subpackets, packet_value)
-                    operation_result[0] *= packet_value[0]
+                    op_result *= packet_value[0]
                     consumed_bits += remaining_bits - len(remaining_string)
                     remaining_bits = len(remaining_string)
+            operation_result[0] = op_result
             return remaining_string
         else:
             # 11 bits
@@ -113,6 +121,7 @@ def decode_package(decoded, operation_result):
             length_of_subpackets = int(l,2)
             initial_index = 7+11
             subpackets = list()
+            op_result = 1
 
             if length_of_subpackets > 0:
                 remaining_string = decoded[initial_index:]
@@ -123,10 +132,11 @@ def decode_package(decoded, operation_result):
                 while remaining_bits > 0 and consumed_packets < length_of_subpackets:
                     subpackets = remaining_string[0:]
                     remaining_string =  decode_package(subpackets, packet_value)
-                    operation_result[0] *= packet_value[0]
+                    op_result *= packet_value[0]
                     consumed_packets += 1
                     remaining_bits = len(remaining_string)
                     initial_index = initial_index + remaining_bits
+            operation_result[0] = op_result     
             return remaining_string
     elif packet_type_id == 2:
         i = decoded[6:7]
@@ -134,6 +144,7 @@ def decode_package(decoded, operation_result):
             # 15 bits
             l = decoded[7:(7+15)]
             length_of_subpackets = int(l,2)
+            op_result = sys.maxsize
             if length_of_subpackets > 0:
                 initial_index = (7+15)
                 remaining_string = decoded[initial_index:]
@@ -145,9 +156,10 @@ def decode_package(decoded, operation_result):
                     subpackets = remaining_string[0:]
                     initial_index = initial_index+length_of_subpackets
                     remaining_string =  decode_package(subpackets, packet_value)
-                    operation_result[0] = min(operation_result[0], packet_value[0])
+                    op_result = min(op_result, packet_value[0])
                     consumed_bits += remaining_bits - len(remaining_string)
                     remaining_bits = len(remaining_string)
+            operation_result[0] = op_result
             return remaining_string
         else:
             # 11 bits
@@ -155,6 +167,7 @@ def decode_package(decoded, operation_result):
             length_of_subpackets = int(l,2)
             initial_index = 7+11
             subpackets = list()
+            op_result = sys.maxsize
 
             if length_of_subpackets > 0:
                 remaining_string = decoded[initial_index:]
@@ -165,10 +178,12 @@ def decode_package(decoded, operation_result):
                 while remaining_bits > 0 and consumed_packets < length_of_subpackets:
                     subpackets = remaining_string[0:]
                     remaining_string =  decode_package(subpackets, packet_value)
-                    operation_result[0] = min(operation_result[0], packet_value[0])
+                    op_result = min(op_result, packet_value[0])
                     consumed_packets += 1
                     remaining_bits = len(remaining_string)
                     initial_index = initial_index + remaining_bits
+
+            operation_result[0] = op_result
             return remaining_string
     elif packet_type_id == 3:
         i = decoded[6:7]
@@ -176,6 +191,7 @@ def decode_package(decoded, operation_result):
             # 15 bits
             l = decoded[7:(7+15)]
             length_of_subpackets = int(l,2)
+            op_result = -sys.maxsize-1
             if length_of_subpackets > 0:
                 initial_index = (7+15)
                 remaining_string = decoded[initial_index:]
@@ -187,9 +203,10 @@ def decode_package(decoded, operation_result):
                     subpackets = remaining_string[0:]
                     initial_index = initial_index+length_of_subpackets
                     remaining_string =  decode_package(subpackets, packet_value)
-                    operation_result[0] = max(operation_result[0], packet_value[0])
+                    op_result = max(op_result, packet_value[0])
                     consumed_bits += remaining_bits - len(remaining_string)
                     remaining_bits = len(remaining_string)
+            operation_result[0] = op_result
             return remaining_string
         else:
             # 11 bits
@@ -197,20 +214,23 @@ def decode_package(decoded, operation_result):
             length_of_subpackets = int(l,2)
             initial_index = 7+11
             subpackets = list()
+            op_result = -sys.maxsize-1
 
             if length_of_subpackets > 0:
                 remaining_string = decoded[initial_index:]
                 remaining_bits = len(remaining_string)
                 consumed_packets = 0
                 packet_value = [0]
-                operation_result[0] = -sys.maxsize-1 
+                operation_result[0] = -sys.maxsize-1
                 while remaining_bits > 0 and consumed_packets < length_of_subpackets:
                     subpackets = remaining_string[0:]
                     remaining_string =  decode_package(subpackets, packet_value)
-                    operation_result[0] = max(operation_result[0], packet_value[0])
+                    op_result = max(op_result, packet_value[0])
                     consumed_packets += 1
                     remaining_bits = len(remaining_string)
                     initial_index = initial_index + remaining_bits
+      
+            operation_result[0] = op_result
             return remaining_string
     elif packet_type_id == 5:
         i = decoded[6:7]
@@ -218,26 +238,30 @@ def decode_package(decoded, operation_result):
             # 15 bits
             l = decoded[7:(7+15)]
             length_of_subpackets = int(l,2)
+            op_result = -sys.maxsize-1
+
             if length_of_subpackets > 0:
                 initial_index = (7+15)
                 remaining_string = decoded[initial_index:]
                 remaining_bits = len(remaining_string)
                 consumed_bits = 0
                 packet_value = [0]
-                first_packet = -1
+                first_packet = -sys.maxsize-1
                 while remaining_bits > 0 and consumed_bits < length_of_subpackets:
                     subpackets = remaining_string[0:]
                     initial_index = initial_index+length_of_subpackets
-                    remaining_string =  decode_package(subpackets, packet_value)                   
-                    if first_packet == -1:
+                    remaining_string = decode_package(subpackets, packet_value)
+
+                    if first_packet == -sys.maxsize-1:
                         first_packet = packet_value[0]
                     else: 
                         if first_packet > packet_value[0]:
-                            operation_result[0] = 1
+                            op_result = 1
                         else:
-                            operation_result[0] = 0
+                            op_result = 0
                     consumed_bits += remaining_bits - len(remaining_string)
                     remaining_bits = len(remaining_string)
+            operation_result[0] = op_result
             return remaining_string
         else:
             # 11 bits
@@ -245,26 +269,29 @@ def decode_package(decoded, operation_result):
             length_of_subpackets = int(l,2)
             initial_index = 7+11
             subpackets = list()
+            op_result = -sys.maxsize-1
 
             if length_of_subpackets > 0:
                 remaining_string = decoded[initial_index:]
                 remaining_bits = len(remaining_string)
                 consumed_packets = 0
                 packet_value = [0]
-                first_packet = -1
+                first_packet = -sys.maxsize-1
                 while remaining_bits > 0 and consumed_packets < length_of_subpackets:
                     subpackets = remaining_string[0:]
                     remaining_string =  decode_package(subpackets, packet_value)
-                    if first_packet == -1:
+
+                    if first_packet == -sys.maxsize-1:
                         first_packet = packet_value[0]
                     else: 
                         if first_packet > packet_value[0]:
-                            operation_result[0] = 1
+                            op_result = 1
                         else:
-                            operation_result[0] = 0
+                            op_result = 0
                     consumed_packets += 1
                     remaining_bits = len(remaining_string)
                     initial_index = initial_index + remaining_bits
+            operation_result[0] = op_result
             return remaining_string
     elif packet_type_id == 6:
         i = decoded[6:7]
@@ -272,27 +299,29 @@ def decode_package(decoded, operation_result):
             # 15 bits
             l = decoded[7:(7+15)]
             length_of_subpackets = int(l,2)
+            op_result = sys.maxsize
             if length_of_subpackets > 0:
                 initial_index = (7+15)
                 remaining_string = decoded[initial_index:]
                 remaining_bits = len(remaining_string)
                 consumed_bits = 0
                 packet_value = [0]
-                first_packet = -1
+                first_packet = sys.maxsize
                 while remaining_bits > 0 and consumed_bits < length_of_subpackets:
                     subpackets = remaining_string[0:]
                     initial_index = initial_index+length_of_subpackets
                     remaining_string =  decode_package(subpackets, packet_value)
                     
-                    if first_packet == -1:
+                    if first_packet == sys.maxsize:
                         first_packet = packet_value[0]
                     else: 
                         if first_packet < packet_value[0]:
-                            operation_result[0] = 1
+                            op_result = 1
                         else:
-                            operation_result[0] = 0
+                            op_result = 0
                     consumed_bits += remaining_bits - len(remaining_string)
                     remaining_bits = len(remaining_string)
+            operation_result[0] = op_result
             return remaining_string
         else:
             # 11 bits
@@ -300,26 +329,29 @@ def decode_package(decoded, operation_result):
             length_of_subpackets = int(l,2)
             initial_index = 7+11
             subpackets = list()
+            op_result = sys.maxsize
 
             if length_of_subpackets > 0:
                 remaining_string = decoded[initial_index:]
                 remaining_bits = len(remaining_string)
                 consumed_packets = 0
                 packet_value = [0]
-                first_packet = -1
+                first_packet = sys.maxsize
                 while remaining_bits > 0 and consumed_packets < length_of_subpackets:
                     subpackets = remaining_string[0:]
                     remaining_string =  decode_package(subpackets, packet_value)
-                    if first_packet == -1:
+
+                    if first_packet == sys.maxsize:
                         first_packet = packet_value[0]
                     else: 
                         if first_packet < packet_value[0]:
-                            operation_result[0] = 1
+                            op_result = 1
                         else:
-                            operation_result[0] = 0
+                            op_result = 0
                     consumed_packets += 1
                     remaining_bits = len(remaining_string)
                     initial_index = initial_index + remaining_bits
+            operation_result[0] = op_result
             return remaining_string
     elif packet_type_id == 7:
         i = decoded[6:7]
@@ -327,27 +359,29 @@ def decode_package(decoded, operation_result):
             # 15 bits
             l = decoded[7:(7+15)]
             length_of_subpackets = int(l,2)
+            op_result = -sys.maxsize-1
             if length_of_subpackets > 0:
                 initial_index = (7+15)
                 remaining_string = decoded[initial_index:]
                 remaining_bits = len(remaining_string)
                 consumed_bits = 0
                 packet_value = [0]
-                first_packet = -1
+                first_packet = -sys.maxsize-1
                 while remaining_bits > 0 and consumed_bits < length_of_subpackets:
                     subpackets = remaining_string[0:]
                     initial_index = initial_index+length_of_subpackets
                     remaining_string =  decode_package(subpackets, packet_value)
-                    
-                    if first_packet == -1:
+
+                    if first_packet == -sys.maxsize-1:
                         first_packet = packet_value[0]
                     else: 
                         if first_packet == packet_value[0]:
-                            operation_result[0] = 1
+                            op_result = 1
                         else:
-                            operation_result[0] = 0
+                            op_result = 0
                     consumed_bits += remaining_bits - len(remaining_string)
                     remaining_bits = len(remaining_string)
+            operation_result[0] = op_result
             return remaining_string
         else:
             # 11 bits
@@ -355,26 +389,29 @@ def decode_package(decoded, operation_result):
             length_of_subpackets = int(l,2)
             initial_index = 7+11
             subpackets = list()
+            op_result = -sys.maxsize-1
 
             if length_of_subpackets > 0:
                 remaining_string = decoded[initial_index:]
                 remaining_bits = len(remaining_string)
                 consumed_packets = 0
                 packet_value = [0]
-                first_packet = -1
+                first_packet = -sys.maxsize-1
                 while remaining_bits > 0 and consumed_packets < length_of_subpackets:
                     subpackets = remaining_string[0:]
                     remaining_string =  decode_package(subpackets, packet_value)
-                    if first_packet == -1:
+
+                    if first_packet == -sys.maxsize-1:
                         first_packet = packet_value[0]
                     else: 
                         if first_packet == packet_value[0]:
-                            operation_result[0] = 1
+                            op_result = 1
                         else:
-                            operation_result[0] = 0
+                            op_result = 0
                     consumed_packets += 1
                     remaining_bits = len(remaining_string)
                     initial_index = initial_index + remaining_bits
+            operation_result[0] = op_result
             return remaining_string
 
 to_decode = content[0]
